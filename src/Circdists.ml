@@ -75,6 +75,14 @@ let rec eval_pdf (dists: distribution list) (xs: float list) =
         end
     |  _ -> 1.
 
+let grid_eval_pdf (dists: distribution list) (xs: phase_vector) (ys: phase_vector) = 
+  let xl,yl = Array.to_list (Gsl.Vector.to_array xs),
+    Array.to_list (Gsl.Vector.to_array ys) in
+  List.map ( 
+    List.map (fun y this_x -> eval_pdf dists y::[this_x])
+      yl
+  ) xl
+
 
 let listify xl = List.map (fun x -> [x]) xl
 let add_1_to_all x l = List.map (fun li -> x ::li) l
