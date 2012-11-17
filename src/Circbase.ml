@@ -142,7 +142,7 @@ let circspace
       offset
   in
   phase_vector_init n (fun i -> 
-    (((spacing *. (float_of_int i)) +. start) +. total_offset) % pi2)
+    (((spacing *. (float_of_int i)) +. start) +. total_offset))
 
 
 

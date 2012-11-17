@@ -127,6 +127,30 @@ val closest_ind_below_or_equal : phase_vector -> float -> int
 (** Same as closest_ind_above, but for array elements @<= than the key.
     ASSUMES that phase_array is sorted ascending *)
 
+(** {6 Vector operations} **)
+
+
+(** initialize phase vector **)
+val phase_vector_init : int -> (int -> unit) -> unit
+
+(** iterate over phase vector elements **)
+val phase_vector_iter : (float -> unit) -> phase_vector -> unit
+
+(** iterate over phase vector indices and elements **)
+val phase_vector_iteri : (int -> float -> unit) -> phase_vector -> unit
+
+(** print phase vector elements **)
+val phase_vector_print : phase_vector -> unit
+
+(** fold left over phase vector **)
+val phase_vector_fold_left : ('a -> float -> 'a) -> 'a -> phase_vector -> 'a
+
+(** phase vector map - but only maps to another phase vector **)
+val phase_vector_map : (float -> float) -> phase_vector -> phase_vector
+
+(** phase vector map with indices - but only maps to another phase vector **)
+val phase_vector_mapi : (int -> float -> float) -> phase_vector -> phase_vector
+
 
 
 
