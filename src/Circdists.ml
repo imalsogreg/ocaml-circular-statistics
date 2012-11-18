@@ -75,39 +75,48 @@ let rec eval_pdf (dists: distribution list) (xs: float list) =
         end
     |  _ -> 1.
 
+let grid_eval_pdf (dists: distribution list) (xs: phase_vector) (ys: phase_vector) = 
+  let xl,yl = Gsl.Vector.to_array xs, Gsl.Vector.to_array ys in
+  Array.map 
+    (fun y -> Array.map (fun x -> eval_pdf dists (y::[x]) ) xl)
+    yl
 
-let listify xl = List.map (fun x -> [x]) xl
-let add_1_to_all x l = List.map (fun li -> x ::li) l
-let add_all_to_all xl l = List.map (fun xli -> add_1_to_all xli l) xl
 
-let x_grid (xs: float list list) = 
-  let xs_list = add_all_to_all (List.nth xs 0) 
-    (listify (List.nth xs 1) ) in
-  xs_list
+let amax l = 
+  let rec aux m i = if i = Array.length l then m else aux (max m l.(i)) (succ i)
+  in aux neg_infinity 0
 
-let map2d f ll =
-  List.map (fun l -> List.map f l) ll
+let amin l =
+  let rec aux m i = if i = Array.length l then m else aux (min m l.(i)) (succ i)
+  in aux infinity 0
 
-let array_of_list2d ll =
-  Array.of_list (List.map (fun l -> Array.of_list l) ll)
-
-let norm = LinNormal (Constant 2., Constant 10.)
-let corr_norm = LinNormal (Constant 1., Dependent (fun x -> 5. -. abs_float(x -. 2.)))
-let x = Array.to_list (Gsl.Vector.to_array (circspace 500))
-let xs = x_grid [ x; x ]
-let pdf = map2d (eval_pdf [corr_norm;norm]) xs
+let norm_pdf p =
+  let m = amax (Array.map lmax p) in
+  Array.map (Array.map (fun x -> x /. m)) p
 
 let cmap x = Graphics.rgb 
-  0 (int_of_float (x *. 2055.)) (int_of_float (x *. 2055.))
+  0 (int_of_float (x *. 255.)) (int_of_float (x *. 255.))
+
+let norm = LinNormal (Constant 3.7, Constant 4.)
+let corr_norm = LinNormal (Constant 1., Dependent (fun x -> 0.02 +. 5. *. abs_float(x /. 2. -. 2.)))
+
+let norm = LinUniform (Constant (-. 7.), Constant 7.)
+let corr_norm = LinNormal (Dependent (fun x -> x *. x /. 10.), Dependent (fun x -> 5.5 +. 5. *. sin x))
+
+let xs = circspace ~start:(-. 10.) ~stop:(10.) 400
+let ys = Gsl.Vector.copy xs
+let p = grid_eval_pdf [corr_norm; norm] xs ys
+let c = Array.map (Array.map cmap) (norm_pdf p)
 
 let () =
-Graphics.open_graph " 500x500"; 
+Graphics.open_graph " 400x400"; 
 
-let im = Graphics.make_image (array_of_list2d (map2d cmap pdf)) in
+let im = Graphics.make_image c in
 
 Graphics.draw_image im 0 0
 
 
+let d = 1
 
 (*
 
@@ -155,6 +164,7 @@ module Cdf_VM_hash = Weak.Make (Cdf : Hashtbl.HashedType)
 
 let cdf_VM ?(precision = 0.01) mu kappa 
 
+  *)
 (* Throw-away timing function *)
 let time n f a =
   let t0 = ref (Unix.gettimeofday () ) in
@@ -166,7 +176,6 @@ let time n f a =
 
 
 
-  *)
 
 
 
