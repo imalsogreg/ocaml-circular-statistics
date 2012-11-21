@@ -67,13 +67,13 @@ let comparison_test () =
   if res then () else
     failwith "Failed circular comparison unit test."
 
-let phase_vector_set_by_fi f (arr: phase_vector) = 
+let phase_vector_set_by_fi (f: int -> float) (arr: Gsl.Vector.vector) = 
   for n = 0 to (V.length arr - 1) do
     arr.{n} <- f n
   done
 
-let phase_vector_init n f =
-  let arr = V.create n in
+let phase_vector_init n (f : int -> float)  =
+  let arr = Gsl.Vector.create n in
   phase_vector_set_by_fi f arr;
   arr
   

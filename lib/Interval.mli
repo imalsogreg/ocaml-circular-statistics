@@ -35,7 +35,7 @@ val in_interval : circ_interval -> float -> bool
     of phases between intr's t0 and t1 tracing counterclockwise *)
 
 (** Count elements from phase array in interval *)
-val n_in_interval : ?sorted:bool -> Circbase.phase_vector -> circ_interval -> int
+val n_in_interval : ?sorted:bool -> Base.phase_vector -> circ_interval -> int
 (** [n_in_interval ~sorted:true/false phase_array intr] returns the number
     of elements from phase_array in intr.  Inticate if phase_array
     is sorted ascending to get faster result. *)

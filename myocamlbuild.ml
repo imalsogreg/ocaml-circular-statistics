@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 5f8799712be44827be5487cfc99ab675) *)
+(* DO NOT EDIT (digest: 85e650df1ab84151b62749ae256e5daf) *)
 module OASISGettext = struct
 # 21 "/home/greghale/.opam/system/build/oasis.0.3.0/src/oasis/OASISGettext.ml"
 
@@ -477,7 +477,7 @@ end
 open Ocamlbuild_plugin;;
 let package_default =
   {
-     MyOCamlbuildBase.lib_ocaml = [("circstat", ["src"])];
+     MyOCamlbuildBase.lib_ocaml = [("circstat", ["lib"])];
      lib_c = [];
      flags = [];
      includes = [];

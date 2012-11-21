@@ -7,7 +7,14 @@ License:     LGPL-2.1 with OCaml linking exception
 Plugins:     META (0.3)
 
 Library circstat
-  Path:       src
-  BuildTools: ocamlbuild
-  Modules:    Circstat
+  Path:        lib
+  FindlibName: circstat
+  Pack:        true
+  BuildTools:  ocamlbuild
+  Modules:     Base,
+               Interval,
+               Distribution,
+               Mean,
+               Median,
+               Plot
   BuildDepends: gsl

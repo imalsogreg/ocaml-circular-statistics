@@ -1,4 +1,4 @@
-open Circstat.Base
+let (pi2, (@-)) = Base.(pi2,(@-))
 
 let inv_pi2 = 1. /. pi2
 let inv_sqrt_pi2 = 1. /. sqrt(pi2)
@@ -44,7 +44,7 @@ type distribution =
 let rec eval_pdf (dists: distribution list) (xs: float list) =
   match List.combine dists xs with
     | (dv_dist,dv)::tl ->
-        begin        
+        (        
           let get_param = function
           Constant c -> c
             | Dependent f -> 
@@ -52,6 +52,7 @@ let rec eval_pdf (dists: distribution list) (xs: float list) =
                     hd::iv::tl -> f iv 
                   | hd::[] -> failwith ("Requested deeper parameter from" ^
                       " deepest distribution.")
+                  | [] -> failwith "Ran out of parameters in eval_pdf"
                 )
           in 
           let p_dv_given_iv =
@@ -72,16 +73,16 @@ let rec eval_pdf (dists: distribution list) (xs: float list) =
           in 
           let p_iv = eval_pdf (List.tl dists) (List.tl xs) in 
           p_dv_given_iv *. p_iv
-        end
+        )
     |  _ -> 1.
 
-let grid_eval_pdf (dists: distribution list) (xs: phase_vector) (ys: phase_vector) = 
+let grid_eval_pdf (dists: distribution list) (xs: Base.phase_vector) (ys: Base.phase_vector) = 
   let xl,yl = Gsl.Vector.to_array xs, Gsl.Vector.to_array ys in
   Array.map 
     (fun y -> Array.map (fun x -> eval_pdf dists (y::[x]) ) xl)
     yl
 
-
+(*
 let amax l = 
   let rec aux m i = if i = Array.length l then m else aux (max m l.(i)) (succ i)
   in aux neg_infinity 0
@@ -117,6 +118,10 @@ Graphics.draw_image im 0 0
 
 
 let d = 1
+
+*)
+
+
 
 (*
 

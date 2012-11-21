@@ -1,11 +1,11 @@
-open Circbase
-open Circinterval
-open Circmean
+open Base
+open Interval
+let mean = Mean.mean
 
 module V = Gsl.Vector
 
-let arr = phase_vector_init 99 (fun x -> float_of_int (x+11));;
-let a = circspace ~start: (pi *. 3. /. 2.) ~stop: (pi /. 2.) 100;;
+let arr = Base.phase_vector_init 99 (fun x -> float_of_int (x+11));;
+let a = Base.circspace ~start: (pi *. 3. /. 2.) ~stop: (pi /. 2.) 100;;
 
 let signi x = if x < 0 then -1 else 1
 let signf x = if x < 0. then -1. else 1.

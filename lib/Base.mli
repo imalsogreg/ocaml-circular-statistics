@@ -80,7 +80,7 @@ val intermediate_points : phase_vector -> phase_vector
 (** [intermediate_points phase_array] returns an array of points, spaced evenly between
     array-consecutive pairs of points in the index array.  This is handy for converting
     between bin-centers and bin-edges for circular histograms. *)
-
+(*
 val phase_vector_init : int -> (int -> float) -> phase_vector
 (** [phase_vector_init n f] creates an n-element vector with elements determined from the indices *)
 
@@ -94,7 +94,7 @@ val phase_vector_mapi : (int -> float -> float) -> phase_vector -> phase_vector
 val phase_vector_iter : (float -> unit) -> phase_vector -> unit
 
 val phase_vector_iteri : (int -> float -> unit) -> phase_vector -> unit
-
+*)
 (** {6 Search in sorted lists} *)
 
 (** Circular comparison *)
@@ -131,7 +131,7 @@ val closest_ind_below_or_equal : phase_vector -> float -> int
 
 
 (** initialize phase vector **)
-val phase_vector_init : int -> (int -> unit) -> unit
+val phase_vector_init : int -> (int -> float) -> Gsl.Vector.vector
 
 (** iterate over phase vector elements **)
 val phase_vector_iter : (float -> unit) -> phase_vector -> unit
