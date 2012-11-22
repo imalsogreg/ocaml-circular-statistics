@@ -10,9 +10,13 @@ let clip_to m input =
 
 let array_max a = 
   Array.fold_left max neg_infinity a
+let array_min a =
+  Array.fold_left min infinity a
 
 let matrix_max m =
   array_max (Array.map array_max m)
+let matrix_min m =
+  array_min (Array.map array_min m)
 
 let array_map2 f a b =
   if Array.length a <> Array.length b then failwith "array_map2 mismatched input sizes."
@@ -55,6 +59,11 @@ let color_add a b =
 let image_add a b =
   array_map2 (array_map2 color_add) a b
 
+let matrix_normalize m =
+  let (m_min, m_max) = matrix_min m, matrix_max m in
+  let update_value x = (x -. m_min) /. (m_max -. m_min) in
+  matrix_map update_value m
+
 let image_of_dist2 
     ?(x_range = (-. pi, pi) ) 
     ?(y_range = (-. pi , pi) ) ?(size = 500,500)
@@ -72,12 +81,11 @@ let image_of_dist2
 
   let pdf = grid_eval_pdf pdf_list xs ys in
   let log_pdf = Array.map (Array.map log) pdf in
-  let (pdf_max, log_pdf_max) = matrix_max pdf, matrix_max log_pdf in
   let pdf_norm = if norm_pdf 
-    then matrix_map (( *. ) (1. /. pdf_max)) pdf 
+    then matrix_normalize pdf
     else pdf in
   let pdf_log_norm = if norm_log_pdf 
-    then matrix_map (( *. ) (1. /. log_pdf_max)) log_pdf 
+    then matrix_normalize log_pdf 
     else log_pdf in
   let base_image = Array.make_matrix (snd size) (fst size) Graphics.black in
   let new_base = match pdf_color with
