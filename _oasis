@@ -6,6 +6,8 @@ Authors:     Greg Hale
 License:     LGPL-2.1 with OCaml linking exception
 Plugins:     META (0.3)
 
+BuildTools:       ocamlbuild, ocamldoc
+
 Library circstat
   Path:        lib
   FindlibName: circstat
@@ -18,3 +20,18 @@ Library circstat
                Median,
                Plot
   BuildDepends: gsl
+
+
+# Examples
+
+Flag examples
+     Description:    Build examples
+     Default:        false      
+
+Executable example_plot
+     Path:           examples
+     MainIs:         Example_plot.ml
+     Build$:         flag(examples)
+     BuildDepends:   circstat, graphics
+     Install:        false
+     CompiledObject: best
