@@ -1,6 +1,6 @@
 open Circstat.Distribution
 
-let size = (150,150)
+let size = (300,300)
 let size_s = " " ^ (string_of_int (snd size)) ^ 
   "x" ^ (string_of_int (fst size))
 
@@ -23,6 +23,9 @@ let rec demo_vm_by_lin beta =
       {Graphics.key = 'q'} -> ()
     | {Graphics.key = 'b'} -> demo_vm_by_lin (beta -. 0.1)
     | {Graphics.key = 'B'} -> demo_vm_by_lin (beta +. 0.1)
+    | _ -> 
+        print_endline "Unrecognized input.  Use b, B, or q";
+        demo_vm_by_lin beta
       
 
 let _ =
@@ -31,6 +34,9 @@ let _ =
 
 
     
+
+
+
 
 
 
