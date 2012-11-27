@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: e7b257b1ca668e49461d13369c2a77ff)
+# DO NOT EDIT (digest: 64cc452d8b4df36a78f68402fe1e1d14)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -20,6 +20,8 @@
 "lib/Distribution.cmx": for-pack(Circstat)
 "lib/Mean.cmx": for-pack(Circstat)
 "lib/Median.cmx": for-pack(Circstat)
+"lib/Fit.cmx": for-pack(Circstat)
+"lib/Sample.cmx": for-pack(Circstat)
 "lib/Plot.cmx": for-pack(Circstat)
 <lib/*.ml{,i}>: pkg_gsl
 # Executable example_plot

@@ -18,8 +18,10 @@ Library circstat
                Distribution,
                Mean,
                Median,
+               Fit,
+               Sample,
                Plot
-  BuildDepends: gsl
+  BuildDepends: gsl, archimedes
 
 
 # Examples

@@ -95,9 +95,18 @@ let image_of_dist2
   in
   match pdf_log_color with
     | None -> new_base
-    | Some target_color -> let norm_pdf_image = matrix_map (cmap target_color) pdf_log_norm in
-                           image_add new_base norm_pdf_image
-                             
+    | Some target_color -> 
+        let norm_pdf_image = matrix_map (cmap target_color) pdf_log_norm in
+        image_add new_base norm_pdf_image
+             
+let init_plot1 ?(size = 500,400) ~(max_value:float) =
+  let module A = Archimedes in
+  let vp = A.init ["graphics";"hold"] in
+  A.Axes box vp ~w=
+    
+
+let plot_dist1 figure ?(r_0 = 10.) ?(r_1 = 20.) f = 
+  let n_xs = 
 
     
 let b = 1
