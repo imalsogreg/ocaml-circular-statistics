@@ -98,14 +98,23 @@ let image_of_dist2
     | Some target_color -> 
         let norm_pdf_image = matrix_map (cmap target_color) pdf_log_norm in
         image_add new_base norm_pdf_image
+
              
-let init_plot1 ?(size = 500,400) ~(max_value:float) =
+(* let init_plot1 ?(size = 500,400) ?(complex_plane = true) max_value:float = *)
+let init_plot1 () = 
   let module A = Archimedes in
   let vp = A.init ["graphics";"hold"] in
-  A.Axes box vp ~w=
+  A.Viewport.axes_ratio vp 1.;
+  A.Axes.box vp;
+  vp
     
+let fit_rect 
 
-let plot_dist1 figure ?(r_0 = 10.) ?(r_1 = 20.) f = 
+let plot_circ_dist1 figure ?(r_0 = 10.) ?(r_1 = 20.) f = 
+  let module A = Archimedes in
+  let dimx,dimy = A.Viewport.dimensions figure in
+  let xrange,yrange = (A.Viewport.xmin figure, A.Viewport.xmax figure),
+    (A.Viewport.ymin figure, A.Viewport.xmax figure) in
   let n_xs = 
 
     
