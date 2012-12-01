@@ -1,5 +1,5 @@
-let (pi,pi2) = Circstat.Base.(pi,pi2)
-let eval_pdf,grid_eval_pdf = Circstat.Distribution.(eval_pdf, grid_eval_pdf)
+let (pi,pi2) = Base.(pi,pi2)
+let eval_pdf,grid_eval_pdf = Distribution.(eval_pdf, grid_eval_pdf)
 module A = Archimedes
 module AV = A.Viewport
 module G = Graphics
@@ -75,7 +75,7 @@ let image_of_dist2
     ?(pdf_color = Some Graphics.blue) ?(pdf_log_color = Some Graphics.red)
     pdf_list =
   let eval_points range n =
-  Circstat.Base.circspace ~start:(fst range) ~stop:(snd range) n in
+  Base.circspace ~start:(fst range) ~stop:(snd range) n in
 (*
   let xs,ys = Gsl.Vector.to_array(eval_points x_range (fst size)), 
     array_reverse (Gsl.Vector.to_array (eval_points y_range (snd size)))  in 
@@ -157,7 +157,7 @@ let plot_phase_vector figure ?(r_0 = 10.) ?(r_1 = 11.) v =
                    [r_0 *. cos p; r_1 *. cos p], [r_0 *. sin p; r_1 *. sin p]
                  in  A.List.xy figure ~style:`Lines xs ys
   in
-  Circstat.Base.phase_vector_iter mk_tic v
+  Base.phase_vector_iter mk_tic v
     
 let b = 1
 

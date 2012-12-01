@@ -1,7 +1,8 @@
-let (pi2, (@-)) = Circstat.Base.(pi2,(@-))
+let (pi2, (@-)) = Base.(pi2,(@-))
 
 let inv_pi2 = 1. /. pi2
 let inv_sqrt_pi2 = 1. /. sqrt(pi2)
+
 
 let vm_pdf mu kappa t=
   (exp (kappa *. cos (t -. mu))) /. (pi2 *. (Gsl.Sf.bessel_I0 kappa))
@@ -171,7 +172,8 @@ module Cdf_VM_hash = Weak.Make (Cdf : Hashtbl.HashedType)
 
 let cdf_VM ?(precision = 0.01) mu kappa 
 
-  *)
+*)
+
 
 
 

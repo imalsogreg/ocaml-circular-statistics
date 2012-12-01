@@ -1,4 +1,4 @@
-let (pi,pi2,(%)) = Circstat.Base.(pi,pi2,(%))
+let (pi,pi2,(%)) = Base.(pi,pi2,(%))
 
 let sign x = if x >= 0. then 1. else -1.
 

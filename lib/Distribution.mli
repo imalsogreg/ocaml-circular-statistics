@@ -1,4 +1,3 @@
-(*
 (** {6 Circular Probability Distribution Functions} *)
 
 (** von Misis distribution *)
@@ -112,5 +111,3 @@ val grid_eval_pdf : distribution list ->
 
 
 
-
-*)
