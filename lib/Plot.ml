@@ -1,5 +1,9 @@
-let pi = Base.pi
-let eval_pdf,grid_eval_pdf = Distribution.(eval_pdf, grid_eval_pdf)
+let (pi,pi2) = Circstat.Base.(pi,pi2)
+let eval_pdf,grid_eval_pdf = Circstat.Distribution.(eval_pdf, grid_eval_pdf)
+module A = Archimedes
+module AV = A.Viewport
+module G = Graphics
+
 
 (* which one to use?  sum_with_max, or clip_to? *)
 let sum_with_max m a b =
@@ -71,7 +75,7 @@ let image_of_dist2
     ?(pdf_color = Some Graphics.blue) ?(pdf_log_color = Some Graphics.red)
     pdf_list =
   let eval_points range n =
-  Base.circspace ~start:(fst range) ~stop:(snd range) n in
+  Circstat.Base.circspace ~start:(fst range) ~stop:(snd range) n in
 (*
   let xs,ys = Gsl.Vector.to_array(eval_points x_range (fst size)), 
     array_reverse (Gsl.Vector.to_array (eval_points y_range (snd size)))  in 
@@ -99,6 +103,18 @@ let image_of_dist2
         let norm_pdf_image = matrix_map (cmap target_color) pdf_log_norm in
         image_add new_base norm_pdf_image
 
+
+let get_xlim vp = 
+  (A.Viewport.xmin vp, A.Viewport.xmax vp)
+
+let set_xlim vp range =
+  A.Viewport.xrange vp (fst range) (snd range)
+
+let get_ylim vp =
+  (A.Viewport.ymin vp, A.Viewport.ymax vp)
+
+let set_ylim vp range =
+  A.Viewport.yrange vp (fst range) (snd range)
              
 (* let init_plot1 ?(size = 500,400) ?(complex_plane = true) max_value:float = *)
 let init_plot1 () = 
@@ -107,16 +123,41 @@ let init_plot1 () =
   A.Viewport.axes_ratio vp 1.;
   A.Axes.box vp;
   vp
-    
-let fit_rect 
+  
+let center vp = 
+  let w,h = (A.Viewport.xmax vp -. A.Viewport.xmin vp), (A.Viewport.ymax vp -. A.Viewport.ymin vp) in
+  A.Viewport.xrange vp (0. -. w /. 2.) (w /. 2.);
+  A.Viewport.yrange vp (0. -. h /. 2.) (h /. 2.);
+  ()
 
-let plot_circ_dist1 figure ?(r_0 = 10.) ?(r_1 = 20.) f = 
-  let module A = Archimedes in
-  let dimx,dimy = A.Viewport.dimensions figure in
-  let xrange,yrange = (A.Viewport.xmin figure, A.Viewport.xmax figure),
-    (A.Viewport.ymin figure, A.Viewport.xmax figure) in
-  let n_xs = 
+let center_and_fit_circle vp r =
+  center vp;
+  let x_scale = max (r /. A.Viewport.xmax vp) 1. in
+  let y_scale = max (r /. A.Viewport.ymax vp) 1. in
+  let scale = max x_scale y_scale in
+  A.Viewport.xrange vp (A.Viewport.xmin vp *. scale) (A.Viewport.xmax vp *. scale);
+  A.Viewport.yrange vp (A.Viewport.ymin vp *. scale) (A.Viewport.ymax vp *. scale);
+  ()
 
+
+let plot_circ_dist1 figure ?(r_0 = 10.) ?(r_scale = 5.) f = 
+  let r_of_p p = r_0 +. r_scale *. p in
+  let dist_f (d: float -> float) theta = let rad = r_of_p (d theta) in
+                                         (rad *. cos theta, rad *. sin theta)
+  in
+  A.xyf ~fill:true ~fillcolor:A.Color.cyan figure (dist_f f) 0. pi2;
+  A.xyf ~fill:true ~fillcolor:A.Color.white figure (function t -> r_0 *. cos t, r_0 *. sin t) 0. pi2;
+  ()
+(*  let dimx,dimy = A.Viewport.dimensions figure in
+  let xrange,yrange = get_xlim vp, get_ylim vp in
+  let n_ts = (dimx *. r_0) /. snd xrange in*)
+  
+let plot_phase_vector figure ?(r_0 = 10.) ?(r_1 = 11.) v =
+  let mk_tic p = let xs,ys = 
+                   [r_0 *. cos p; r_1 *. cos p], [r_0 *. sin p; r_1 *. sin p]
+                 in  A.List.xy figure ~style:`Lines xs ys
+  in
+  Circstat.Base.phase_vector_iter mk_tic v
     
 let b = 1
 

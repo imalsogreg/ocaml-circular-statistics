@@ -1,4 +1,4 @@
-let (pi2, (@-)) = Base.(pi2,(@-))
+let (pi2, (@-)) = Circstat.Base.(pi2,(@-))
 
 let inv_pi2 = 1. /. pi2
 let inv_sqrt_pi2 = 1. /. sqrt(pi2)
@@ -18,6 +18,8 @@ let wrapped_cauchy_pdf mu rho t =
       (1. +. rho *. rho -. (2. *. rho *. (cos(t @- mu))))
 
 let lin_uniform_pdf bg en t = if t >= bg && t <= en then 1. /. (en -. bg) else 0.
+
+let circ_uniform_pdf = inv_pi2
 
 let lin_normal_pdf mu sigma_sq t =
   let sigma = sqrt sigma_sq in
@@ -59,7 +61,7 @@ let rec eval_pdf (dists: distribution list) (xs: float list) =
           match dv_dist with
               VonMises (mu, kappa) -> 
                 vm_pdf (get_param mu) (get_param kappa) dv
-            | CircUniform -> inv_pi2
+            | CircUniform -> circ_uniform_pdf
             | WrappedNormal (mu, rho) -> 
                 failwith "Wrapped normal distribution not implemented"
             | WrappedCauchy (mu, rho) -> 
@@ -170,22 +172,6 @@ module Cdf_VM_hash = Weak.Make (Cdf : Hashtbl.HashedType)
 let cdf_VM ?(precision = 0.01) mu kappa 
 
   *)
-(* Throw-away timing function *)
-let time n f a =
-  let t0 = ref (Unix.gettimeofday () ) in
-  for n = 1 to n do
-    f a
-  done;
-  (Unix.gettimeofday () -. !t0) /. (float_of_int) n
-
-
-
-
-
-
-
-
-
 
 
 

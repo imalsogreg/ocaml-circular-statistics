@@ -1,6 +1,41 @@
+(*
 (** {6 Circular Probability Distribution Functions} *)
 
+(** von Misis distribution *)
+val vm_pdf : float -> float -> float -> float
+(** [vm_pdf mu kappa x] returns the value of VM(mu,kappa) at phase x *)
+
+(** Cardioid distribution *)
+val cardioid_pdf : float -> float -> float -> float
+(** [cardioid_pdf mu rho x] returns value of cardioid pdf at phase x *)
+
+(** Wrapped cauchy distribution *)
+val wrapped_cauchy_pdf : float -> float -> float -> float
+(** [wrapped_cauchy_pdf mu rho x] -> WCD(mu,rho) at phase x *)
+
+(** Linear Uniform Distibution *)
+val lin_uniform_pdf : float -> float -> float -> float
+(** [lin_uniform_pdf beginning ending x] returns the value of the uniform distribution at x *)
+(** Provided here for convenience - although obviously not a circular distribution,
+    useful to have this for mixed circular-linear joint distributions. *)
+
+(** Circular Uniform Distribution *)
+val circ_uniform_pdf : float
+(** [circ_uniform_pdf] returns 1/(2 pi), the uniform circular distribution with support
+    for all phases. *)
+(** TODO: Allow circ_uniform_pdf to take beginning and ending parameters, as the
+    lin_uniform_pdf can *)
+
+(** Linear Normal Distribution *)
+val lin_normal_pdf : float -> float -> float -> float
+(** [lin_normal_pdf mu sig_sq x] returns the pdf value of N(mu,sig_sq) at value x
+    Not a circular distribution, but useful for circular-linear joint distributions *)
+
+(** {6 Higher-order distributions} *)
+
 (** Distribution parameters *)
+(** TODO: replace variant with a function : float list -> float.  This covers
+    the 'constant' case simply eg as: function _ -> 1.4 *)
 type dist_param =
   | Constant of float
   | Dependent of (float -> float)
@@ -78,3 +113,4 @@ val grid_eval_pdf : distribution list ->
 
 
 
+*)

@@ -18,9 +18,7 @@ Library circstat
                Distribution,
                Mean,
                Median,
-               Fit,
-               Sample,
-               Plot
+               Fit
   BuildDepends: gsl, archimedes
 
 
@@ -30,10 +28,10 @@ Flag examples
      Description:    Build examples
      Default:        true
 
-Executable example_plot
-     Path:           examples
-     MainIs:         Example_plot.ml
-     Build$:         flag(examples)
-     BuildDepends:   circstat, graphics
-     Install:        false
-     CompiledObject: best
+#Executable example_plot
+#     Path:           examples
+#     MainIs:         Example_plot.ml
+#     Build$:         flag(examples)
+#     BuildDepends:   circstat, graphics
+#     Install:        false
+#     CompiledObject: best

@@ -1,4 +1,5 @@
-open Circstat.Distribution
+(*
+module D = Circstat.Distribution
 
 let size = (300,300)
 let size_s = " " ^ (string_of_int (snd size)) ^ 
@@ -6,10 +7,10 @@ let size_s = " " ^ (string_of_int (snd size)) ^
 
 let rec demo_vm_by_lin beta =
 
-  let iv = LinNormal( Constant (-. 1.), Constant 5.) in
+  let iv = D.LinNormal( D.Constant (-. 1.), D.Constant 5.) in
   let link = fun x -> 2. *. atan (beta *.x) in
   let k_link = fun x -> (2. +. (sin (x *. 4.))) *. 10. in
-  let dv = VonMises( Dependent link, Dependent k_link) in
+  let dv = D.VonMises( Dependent link, D.Dependent k_link) in
 
   let im = Circstat.Plot.image_of_dist2 
     ~x_range:(-. 3., 3.) 
@@ -32,8 +33,7 @@ let _ =
   Graphics.open_graph size_s;
   demo_vm_by_lin 2.
 
-
-    
+*)  
 
 
 

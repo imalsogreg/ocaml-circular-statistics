@@ -1,4 +1,4 @@
-let (pi,pi2,(%)) = Base.(pi,pi2,(%))
+let (pi,pi2,(%)) = Circstat.Base.(pi,pi2,(%))
 
 let sign x = if x >= 0. then 1. else -1.
 
@@ -21,18 +21,18 @@ let vm_samp mu kappa =
   let a = 1. +. sqrt (1. +. 4. *. kappa *. kappa) in 
   let b = (a -. sqrt (2. *. a)) /. (2. *. kappa) in 
   let r = (1. +. b *. b) /. (2. *. b) in 
-  let finalize u_1 u_2 u_3 f = (sign (u_3 -. 0.5) *. acos f *. mu) % pi2 in
+  let finalize u_3 f = (sign (u_3 -. 0.5) *. acos f +. mu) % pi2 in
   let rec aux () = 
     let u1, u2, u3 = Random.float 1., Random.float 1., Random.float 1. in 
     let z = cos (pi *. u1) in 
     let f = (1. +. r *. z) /. (r +. z) in
     let c = kappa *. (r -. f) in
     if c *. (2. -. c) -. u2 > 0.
-    then finalize u1 u2 u3 f
+    then finalize u3 f
     else begin
-      if log10(c /. u2) *. 1. -. c < 0. 
+      if log10(c /. u2) +. 1. -. c < 0. 
       then aux ()
-      else finalize u1 u2 u3 f
+      else finalize u3 f
     end
   in 
   aux ()
