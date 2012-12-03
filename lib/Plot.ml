@@ -117,7 +117,7 @@ let set_ylim vp range =
   A.Viewport.yrange vp (fst range) (snd range)
              
 (* let init_plot1 ?(size = 500,400) ?(complex_plane = true) max_value:float = *)
-let init_plot1 () = 
+let init_circ_plot1 () = 
   let module A = Archimedes in
   let vp = A.init ["graphics";"hold"] in
   A.Viewport.axes_ratio vp 1.;
@@ -159,7 +159,98 @@ let plot_phase_vector figure ?(r_0 = 10.) ?(r_1 = 11.) v =
   in
   Base.phase_vector_iter mk_tic v
     
+
 let b = 1
+
+type contour_opts = int * int * Archimedes.Color.t * Archimedes.Color.t
+let contour_default = Contours (10, 100, Archimedes.Color.black, Archimedes.Color.white)
+
+let color_from_range low high x =
+  let interp l h = low +. x *. (h -. l) in
+  let r, g, b, a = Archimedes.get_rgba l in
+  let r',g',b',a' = Archimedes.get_rgba h in
+  Archimedes.rgba (interp r r') (interp g g') (interp b b') (interp a a')
+    
+let rec drop_n n l =
+  match l with
+      xs when n <= 0 -> xs
+    | x::xs -> drop_n (n-1) xs
+    | [] -> []
+
+let rec drop_until pred l =
+  match l with
+      hd::tl when not (pred hd) -> drop_until pred tl
+    | x -> x
+
+let rec l_last l =
+  match l with
+      [] -> []
+    | x::[] -> x
+    | x::xs -> l_last xs
+
+let px_in_domain d_start d_stop px subsample =
+  let border_dist = match px with p0::p1::_ -> (p1 -. p0) /. 2. | _ -> 0. in
+  let p_in_domain p = p >= d_start -. border_dist && p <= d_stop +. border_dist in
+  let rec aux p acc =
+    match p with
+        p0::[] when p_in_domain p0 -> List.rev (p0::acc)
+      | p0::[]                     -> List.rev (acc)
+      | p0::tl when p_in_domain p0 -> let n_to_drop = (min (List.length tl) subsample) - 1 in
+                                      aux (drop_n n_to_drop tl) (p0::acc)
+      | p0::_ -> List.rev acc
+      | [] -> failwith "Impossible case"
+  in
+  aux (drop_until p_in_domain px) []
+
+let rec list_init f n =
+  let rec aux i acc = if (i = n-1) 
+    then List.rev acc 
+    else aux (i+1) (f i :: acc)
+  in aux 0 []
+    
+
+let fig_xs_ys fig =
+  let module A = Archimedes.Viewport in
+  let ((x0,x1), (y0,y1), (xn,yn)) = 
+    ((A.xmin fig, A.xmax fig), 
+     (A.ymin fig, A.ymax fig), 
+     A.dimensions fig)
+  in
+  let dx,dy = (x1 -. x0) /. (xn -. 1.), (y1 -. y0) /. (yn -. 1.) in
+  let xs = list_init (function i -> x0 +. (float_of_int i) *. dx) 
+  and ys = list_init (function i -> y0 +. (float_of_int i) *. dy) 
+  in
+  xs, ys
+
+let arch_2d_fn fig
+    ?(domain = Some((-. 1., 1.), (-1., 1.)))
+    ?(sublample = 1)
+    ?(pt_size = 1)
+    ?(norm_c = True)
+    ?(c_range = Some(Archimedes.Color.rgba 0. 0. 0. 0.5, Archimedes.Color.white))
+    ?(log_c_range = Some(Archimedes.Color.rgba 0. 0. 0. 1., Archimedes.Color.blue))
+    ?(contour = None)
+    ?(grow_plot = false)
+    f =
+  let module A = Archimedes in
+  let plot_size_x, plot_size_y = A.dimensions fig in
+  let x_domain, y_domain =
+    match domain with
+        Some (((xmin,xmax),(xmin,ymax)) as d)  when grow_plot = True -> 
+          A.auto_fit xmin ymin (xmax -. xmin) (ymax -. ymin);
+          d
+      | Some ((xmin,xmax) as xr, (ymxn,ymax) as yr) -> 
+          ((max xmin (AV.xmin fig), min xmax (AV.xmax fig)),
+           (max ymin (AV.ymin fig), min ymax (AV.ymax fig)))
+      | None -> (AV.xmin fig, AV.xmax fig), (AV.ymin fig, AV.ymax fig)
+  in
+  let domain_width,domain_hieght = 
+    snd x_range - fst x_range, 
+    snd y_range - fst y_range in
+  let domain_px_x, domain_px_y = 
+  let range_px first last n = 
+    
+
 
 
 
