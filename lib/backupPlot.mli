@@ -16,9 +16,8 @@ val image_of_dist2:
 
 (* Contour plot options: 
    NoContours or Contours of n_lines, n_line_samples, low_color, high_color *)
-type contour_opts = NoContours 
-                    | Contours of int * int * Archimedes.Color.t * Archimedes.Color.t
-
+type contour_opts = int * int * Archimedes.Color.t * Archimedes.Color.t
+(*
 (** Plot a function of two variables (like matlab's imagesc) *)
 val arch_2d_fn : 
   Archimedes.Viewport.t ->
@@ -29,11 +28,12 @@ val arch_2d_fn :
   ?c_range : (Archimedes.Color.t * Archimedes.Color.t) option ->
   ?log_c_range : (Archimedes.Color.t * Archimedes.Color.t) option ->
   ?contour : contour_opts option ->
-  (float -> float -> float)
+  ?grow_plot : bool ->
+  (float -> float -> float) -> unit
 (** [arch_2d_fx fig fn] plots colored points on an Archimedes viewport fig
     according to function fn 
     TODO: explain optional arguments*)
-
+*)
 
     
      

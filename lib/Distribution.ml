@@ -44,7 +44,10 @@ type distribution =
 (* P(Y=y, X=x) = P(Y|X=x)*P(X=x) *)
 (* P(Z=z, Y=y, X=x) = P(Z=z | Y=y, X=x)*P(Y=y, X=x) *)
 
-let rec eval_pdf (dists: distribution list) (xs: float list) =
+type joint_dist = distribution list (* mostdependent :: (dependent :: (independent))  *)
+type joint_rv = float list          (* mostdependent :: (dependent :: (independent))  *)
+
+let rec eval_pdf dists (xs: float list) =
   match List.combine dists xs with
     | (dv_dist,dv)::tl ->
         (        

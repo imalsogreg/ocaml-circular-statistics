@@ -37,6 +37,41 @@ let vm_samp mu kappa =
   in 
   aux ()
 
+let simple_sample d =
+  let module D = Distribution in
+  match d with
+      D.LinUniform (D.Constant s0, D.Constant s1) -> lin_uniform_samp (s0, s1)
+    | D.LinNormal  (D.Constant mu, D.Constant sig_sq) -> lin_normal_samp mu sig_sq
+    | D.VonMises   (D.Constant mu, D.Constant kappa) -> vm_samp mu kappa
+    | _ -> failwith "Not implemented yet."
+
+let dependent_sample d xs =
+  let module D = Distribution in
+  let eval_param p v = match p with D.Constant k -> k 
+    | D.Dependent _ when xs = [] -> failwith "dependent_sample called without x value"
+    | D.Dependent f -> f (List.hd xs) 
+  in
+  match d with
+      D.LinUniform (p_s0, p_s1) -> lin_uniform_samp (eval_param p_s0 xs, eval_param p_s1 xs)
+    | D.LinNormal (p_s0, p_s1) -> lin_normal_samp (eval_param p_s0 xs) (eval_param p_s1 xs)
+    | D.VonMises (p_s0, p_s1) -> vm_samp (eval_param p_s0 xs) (eval_param p_s1 xs)
+    | _ -> failwith "Not implemented yet."
+
+let joint_sample d =
+  List.fold_right (fun d_iv acc -> (dependent_sample d_iv acc):: acc ) d []
+
+
+let xs_ys_of_n_samples (d: Distribution.distribution list) n =
+  let rec n_samps n' acc = 
+    match n' with
+        0 -> acc
+      | n'' -> n_samps (n''-1) (joint_sample d :: acc) in
+  let rec transpose list = 
+    try List.map List.hd list :: transpose (List.map List.tl list) with _ -> [] in
+  let samps_tnsp = transpose (n_samps n []) in
+  (List.nth samps_tnsp 1, List.nth samps_tnsp 0)
+
+
 
 
 

@@ -117,9 +117,11 @@ let set_ylim vp range =
   A.Viewport.yrange vp (fst range) (snd range)
 
 (* let init_plot1 ?(size = 500,400) ?(complex_plane = true) max_value:float = *)
-let init_circ_plot1 () =
+let init_circ_plot1 
+    ?(mode = ["graphics";"hold"])
+    () =
   let module A = Archimedes in
-  let vp = A.init ["graphics";"hold"] in
+  let vp = A.init mode in
   A.Viewport.axes_ratio vp 1.;
   A.Axes.box vp;
   vp
@@ -163,18 +165,20 @@ let plot_phase_vector figure ?(r_0 = 10.) ?(r_1 = 11.) v =
 let b = 1
 
 type contour_opts = int * int * Archimedes.Color.t * Archimedes.Color.t
-let contour_default = Contours (10, 100, Archimedes.Color.black, Archimedes.Color.white)
+let contour_default = 10, 100, Archimedes.Color.black, Archimedes.Color.white
 
-let color_from_range low high x =
-  let interp l h = low +. x *. (h -. l) in
-  let r, g, b, a = Archimedes.get_rgba l in
-  let r',g',b',a' = Archimedes.get_rgba h in
-  Archimedes.rgba (interp r r') (interp g g') (interp b b') (interp a a')
 
-let rec drop_n n l =
+let color_from_range c_low c_high v_low v_high x =
+  let pref_val = (x -. v_low)  /. (v_high -. v_low) in
+  let interp l h = l +. pref_val *. (h -. l) in
+  let r, g, b, a = Archimedes.Color.get_rgba c_low in
+  let r',g',b',a' = Archimedes.Color.get_rgba c_high in
+  Archimedes.Color.rgba (interp r r') (interp g g') (interp b b') (interp a a')
+
+let rec drop_n l n =
   match l with
       xs when n <= 0 -> xs
-    | x::xs -> drop_n (n-1) xs
+    | x::xs -> drop_n xs (n-1)
     | [] -> []
 
 let rec drop_until pred l =
@@ -196,7 +200,7 @@ let px_in_domain d_start d_stop px subsample =
         p0::[] when p_in_domain p0 -> List.rev (p0::acc)
       | p0::[]                     -> List.rev (acc)
       | p0::tl when p_in_domain p0 -> let n_to_drop = (min (List.length tl) subsample) - 1 in
-                                      aux (drop_n n_to_drop tl) (p0::acc)
+                                      aux (drop_n tl n_to_drop) (p0::acc)
       | p0::_ -> List.rev acc
       | [] -> failwith "Impossible case"
   in
@@ -220,66 +224,144 @@ let fig_xs_ys fig =
   in
   xs, ys
 
-let plot_xs_ys fig domain =
+let rec final_tail ls = 
+  match ls with 
+      [] -> failwith "tail of empty list"
+    | hd::[] -> hd 
+    | hd::tl -> final_tail tl
+
+let keep_n l n =
+  let rec aux ls n_more acc =
+    match ls with
+        [] -> List.rev acc
+      | _ when n_more = 0 -> List.rev acc
+      | hd::tl -> aux tl (n_more - 1) (hd::acc) 
+  in aux l n []
+
+let take_every_nth l n =
+  let rec aux ls acc = match ls with 
+      [] -> List.rev acc 
+    | hd::tl -> aux (drop_n tl (n-1)) (hd::acc)
+  in aux l []
+
+(*
+let take_every_nth_with_caps ls subsample =
+  match ls with
+    | []
+    | _::[] 
+    | _::_::[] -> ls
+    | hd::tl -> 
+        let headcap, middle, tail = hd, (keep_n tl (List.length tl - 1)), final_tail ls
+        in
+        let rec aux l acc = match l with
+            [] -> List.rev (tail::acc)
+          | hd::tl -> aux (drop_n l subsample) (hd::acc)
+        in headcap::(aux middle []) 
+        *)
+
+let plot_xs_ys fig domain subsample =
   let ((xmin,xmax),(ymin,ymax)) = domain in
   let xs,ys = fig_xs_ys fig in
   let bx,by =
     (List.nth xs 2 -. (List.nth xs 1)) /. 2.,
     (List.nth ys 2 -. (List.nth ys 1)) /. 2. in
   let filter_and_stay_in_bounds ps bmin bmax =
-    let in_domain x = x >= bmin && x <= bmax in
     List.map (fun p -> match p with
         x when x < bmin -> bmin
       | x when x > bmax -> bmax
       | x -> x)
       (List.filter (fun x -> x >= bmin && x <= bmax) ps)
   in
-  let ok_xs = filter_and_stay_in_bounds xs (xmin -. bx) (xmax +. bx)
-  and ok_ys = filter_and_stay_in_bounds ys (ymin -. by) (ymax +. by) in
-  ok_xs, ok_ys
+  let ok_xs = 
+    take_every_nth (filter_and_stay_in_bounds xs (xmin -. bx) (xmax +. bx)) subsample
+  and ok_ys = 
+    take_every_nth (filter_and_stay_in_bounds ys (ymin -. by) (ymax +. by)) subsample
+  in ok_xs, ok_ys
 
 let list_min l = 
   List.fold_left min infinity l
 let list_max l =
   List.fold_left max neg_infinity l
 
-let arch_2d_fn fig
+let comp_one_val (f: float -> float -> float) (x: float) (y: float) =
+  x,y, f x y
+
+let arch_add_square 
+    ?(stroke_fun = fun (r,g,b,a) -> (r/.2.,g/.2.,b/.2.,a/.2.) )
+    ?(fill_fun = fun (r,g,b,a) -> (r,g,b,a) )
+    s vp
+    =
+  let module B = Archimedes.Backend in
+  let marker_name = "S" ^ string_of_int s in
+  let f = float_of_int s in
+  Archimedes.Marker.add marker_name (fun handle ->
+    let context_color = Archimedes.Viewport.get_color vp in
+    let r', g', b', a' = fill_fun (Archimedes.Color.get_rgba context_color) in
+    let fill_c = Archimedes.Color.rgba r' g' b' a' in
+    let r'', g'', b'', a'' = stroke_fun (Archimedes.Color.get_rgba context_color) in
+    let stroke_c = Archimedes.Color.rgba r'' g'' b'' a'' in
+
+    B.rectangle handle ~x:0. ~y:0. ~w:f ~h:f;
+    Archimedes.Backend.set_color handle fill_c;
+    B.fill handle;
+
+    B.rectangle handle ~x:0. ~y:0. ~w:f ~h:f;
+    Archimedes.Backend.set_color handle stroke_c;
+    B.stroke handle; 
+
+    Archimedes.Backend.set_color handle context_color
+  )
+    {Archimedes.Matrix.x=((-. f) /. 2.); y=((-. f) /. 2.); w=f; h=f};
+  marker_name
+    
+
+let arch_2d_fn 
+    (fig: Archimedes.Viewport.t)
     ?(domain = Some((-. 1., 1.), (-1., 1.)))
-    ?(sublample = 1)
-    ?(pt_size = 1)
-    ?(norm_c = True)
+    ?(subsample = 20)
+    ?(pt_size = 1) (* I haven't figured out how to make bigger markers in archimedes yet *)
+    ?(norm_c = true)
     ?(c_range = Some(Archimedes.Color.rgba 0. 0. 0. 0.5, Archimedes.Color.white))
-    ?(log_c_range = Some(Archimedes.Color.rgba 0. 0. 0. 1., Archimedes.Color.blue))
-    ?(contour = None)
-    ?(grow_plot = false)
-    f =
+    ?(log_c_range = None)  (* A bug somewhere causes use of log_c_range to produce out-of-bounds colors  *)
+    ?(contour : contour_opts option = None)
+    ?(grow_plot = true) (* Without grow_plot, if this is the first thing being plotted, what do we do? Is a fresh plot initialized to some size? *)
+    (f: float -> float -> float) =
   let module A = Archimedes in
-  let plot_size_x, plot_size_y = A.dimensions fig in
+  let module AV = A.Viewport in
   let x_domain, y_domain =
     match domain with
-        Some (((xmin,xmax),(xmin,ymax)) as d)  when grow_plot = True ->
-          A.auto_fit xmin ymin (xmax -. xmin) (ymax -. ymin);
-          d
-      | Some ((xmin,xmax) as xr, (ymxn,ymax) as yr) ->
+        Some (((xmin,xmax),(ymin,ymax)) as d)  when grow_plot = true -> d
+      | Some ((xmin,xmax) , (ymin,ymax) ) ->
           ((max xmin (AV.xmin fig), min xmax (AV.xmax fig)),
            (max ymin (AV.ymin fig), min ymax (AV.ymax fig)))
       | None -> (AV.xmin fig, AV.xmax fig), (AV.ymin fig, AV.ymax fig)
   in
-  let xs,ys = plot_xs_ys fig (x_domain,y_domain) in
-  let pts_vals = List.map (List.map (fun x y -> (x, y, f x y)) xs) ys in
-  let vmin = list_min (List.map (List.fold_left (fun (x,y,p) -> min p) (0., 0., infinity))) 
-  and vmax = list_max (List.map (List.fold_left (fun (x,y,p) -> max p) (0., 0., neg_infinity))) in
+  A.Viewport.auto_fit fig (fst x_domain) (fst y_domain) (snd x_domain) (snd y_domain);
+  let xs,ys = plot_xs_ys fig (x_domain,y_domain) subsample in
+  let (pts_vals: (float * float * float) list list ) = 
+    List.map (fun y -> (List.map (fun x -> comp_one_val f x y) xs) ) ys in
+  let vmin = list_min (List.map (List.fold_left (fun i (x,y,p) -> min i p) infinity) pts_vals)
+  and vmax = list_max (List.map (List.fold_left (fun i (x,y,p) -> max i p) neg_infinity) pts_vals) in
   let l_vmin,l_vmax = log vmin, log vmax in
-  let render_point p = 
-    let v = f x y in
-    let c = color_from_range 
-  List.iter (List.iter 
+
+  let our_marker = arch_add_square (subsample / 8) fig in  (* This is defined so late b/c it depends on the viewport being sized.  Ugly? *)
+
+  let render_point (x,y,p) = 
+    let (c: Archimedes.Color.t) = match c_range with 
+        Some (c_low, c_high) -> color_from_range c_low c_high vmin vmax p
+      | None -> Archimedes.Color.rgba 0. 0. 0. 0.
+    and (l_c: Archimedes.Color.t) = match log_c_range with
+        Some (c_low, c_high) -> color_from_range c_low c_high l_vmin l_vmax p
+      | None -> Archimedes.Color.rgba 0. 0. 0. 0. in
+    A.set_color fig (Archimedes.Color.add l_c c ~op:Archimedes.Color.Over) ;
+    A.Array.xy fig ~style:(`Markers our_marker) [|x|] [|y|] 
+  in
+  List.iter (List.iter render_point) pts_vals
     
 
-
-
-
-    let b  = 1
+let arch_2d_samps fig xs ys =
+  A.set_color fig Archimedes.Color.red;
+  Archimedes.List.xy fig xs ys
 
 
 

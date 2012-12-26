@@ -21,7 +21,7 @@ Library circstat
                Fit,
                Sample,
                Plot
-  BuildDepends: gsl, archimedes
+  BuildDepends: gsl, graphics, archimedes, optimization1d
 
 
 # Examples
@@ -35,5 +35,13 @@ Executable example_plot
      MainIs:         Example_plot.ml
      Build$:         flag(examples)
      BuildDepends:   circstat, graphics
+     Install:        false
+     CompiledObject: best
+
+Executable example_dist_samps
+     Path:           examples
+     MainIs:         Example_dist_samps.ml
+     Build$:         flag(examples)
+     BuildDepends:   circstat, archimedes, graphics
      Install:        false
      CompiledObject: best

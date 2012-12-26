@@ -57,6 +57,9 @@ type distribution =
     included here for convenient mixing of circular and linear
     distributions *)
 
+type joint_dist = distribution list
+type joint_rv = float list
+
 
 (** Full distributions are made by composing 1-D distributions
     Examples:

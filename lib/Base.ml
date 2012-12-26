@@ -6,6 +6,8 @@ let (%) a b =
 (* alias 2pi for convenience *)
 let pi = 4. *. atan 1.
 let pi2 = 2. *. pi
+let npi = (-. 1.) *. pi
+let n2pi = (-. 2.) *. pi
 
 module V = Gsl.Vector
 module M = Gsl.Matrix
@@ -107,6 +109,17 @@ let phase_vector_fold_left f i arr =
   done;
   !a
 
+let phase_vector_length (arr: phase_vector) = Gsl.Vector.length arr
+
+
+let phase_vector_fold_left2 f i arr1 arr2 =
+  let a = ref i in
+  for n = 0 to (phase_vector_length arr1 - 1) do
+    a := f !a arr1.{n} arr2.{n}
+  done;
+  !a
+
+  
 let phase_vector_map f arr =
   let a = V.create (V.length arr) in
   for n = 0 to (V.length arr) - 1 do
@@ -120,6 +133,23 @@ let phase_vector_mapi f arr =
     a.{n} <- (f n arr.{n})
   done;
   a
+
+
+let array_merge a1 a2 =
+  let a = Array.make (min (Array.length a1) (Array.length a2)) (0.,0.) in
+  let rec aux n = match n with
+      0 -> ()
+    | n -> a.(n) <- (a1.(n), a2.(n)); aux (n-1)
+  in
+  aux (Array.length a - 1);
+  a
+
+let phase_vector_merge l1 l2 =
+  let l1' = V.to_array l1
+  and l2' = V.to_array l2 in
+  array_merge l1' l2'
+
+
 
 (* throwaway profile function *)
 let timer n f arg =
